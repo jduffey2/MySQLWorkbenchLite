@@ -1,0 +1,26 @@
+#tablenamesDiv {
+	border: 1px solid black;
+	width: 30%;
+	height: 95%;
+	float: left;
+}
+
+li input {
+    position: absolute;
+    left: 0;
+    margin-left: 0;
+    opacity: 0;
+    z-index: 2;
+    cursor: pointer;
+    height: 1em;
+    width: 1em;
+    top: 0;
+}
+li label {
+    cursor: pointer;
+    display: block;
+}
+
+.hidden {
+    display: none;
+}
