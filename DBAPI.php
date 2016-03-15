@@ -50,3 +50,30 @@ function getDatabases($server, $user, $pass) {
         
 	return $result;
 }
+
+function getTables($server, $user, $pass, $dbName) {
+    $dbConn = new mysqli($server, $user, $pass);
+	if($dbConn->connect_error) {
+		$val = $dbConn->connect_error;
+	}
+	else {
+		$val = 0;
+	}
+        
+        $query = "SHOW TABLES IN " . $dbName;
+        
+        $sqlResult = $dbConn->query($query);
+        
+        
+	$dbConn->close();
+	$result = array();
+	$result['error'] = $val;
+        $result['tables'] = array();
+        $i = 0;
+        while( $row = $sqlResult->fetch_array()) {
+            $result['tables'][$i] = $row[0];
+            $i++;
+        }
+        
+	return $result;
+}
