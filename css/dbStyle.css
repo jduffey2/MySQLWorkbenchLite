@@ -24,3 +24,17 @@ li label {
 .hidden {
     display: none;
 }
+
+table, th, tr, td{
+    border: indigo 3px solid;
+    border-collapse: collapse;
+    padding: 5px;
+}
+
+th {
+    font-weight: bolder;
+}
+
+table {
+    margin: 20px;
+}

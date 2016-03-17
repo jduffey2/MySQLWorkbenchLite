@@ -1,3 +1,11 @@
+<!--
+    TODO:   Spice up the CSS - it sucks right nowaday
+    TODO:   Figure out in schema_success changing null values into either "" or NULL so they show up in the table
+    TODO:   Figure out why the last row is there in the getSchema/schema_success function
+    TODO:   Add functionality of CUD for Database operations
+    TODO:   Add functionality of CRUD for a table in a DB
+    TODO:   Add Swag
+-->
 <html>
 	<head>
 		<title>DB Table Creation</title>
@@ -6,102 +14,29 @@
 		<script type="text/javascript" src="javascript/jquery-2.2.1.min.js"></script>
 	</head>
 	<body>
-        <?php
-            require_once 'DBAPI.php';
-        ?>
 	<div id="authenticateDiv">
-            <?php
-                //User hit log out button
-                if(isset($_POST['logout'])) {
-                    unset($_COOKIE['server']);
-                    unset($_COOKIE['username']);
-                    unset($_COOKIE['password']);
-                    setcookie('authenticated', FALSE, time()+86400);
-                }
             
-                $hide_area = "";
-                //If the form was submitted by the authentication submit button
-                if(isset($_POST['authenticate'])) {
-                    //try authenticating the user
-                    
-                    $auth = authenticateUser($_POST['serverTB'], $_POST['userTB'],$_POST['passTB']);
-                    //no error generated means the connection was successful and the user authenticated
-                    //store credentials in session variable
-                    //hide authentication boxes
-                    if($auth['error'] == 0) {
-                        setcookie('server',$_POST['serverTB'],time() + 86400);
-                        setcookie('username',$_POST['userTB'],time() + 86400);
-                        setcookie('password',$_POST['passTB'],time() + 86400);
-                        setcookie('authenticated',TRUE,time() + 86400);
-//                        $_SESSION['username'] = $_POST['userTB'];
-//                        $_SESSION['password'] = $_POST['passTB'];
-//                        $_SESSION['authenticated'] = TRUE;
-                        $hide_area = "class='hidden'";                     
-                    }
-                }
-            ?>
-            
-            <form action="" method="post" <?php echo $hide_area;?>>
-                Server:<input type="text" name="serverTB" value="">
-                Username:<input type="text" name="userTB" value="">
-                Password:<input type="password" name="passTB">
-                <input type="submit" value="Submit" name="authenticate">
-            </form>
-            
-            <form action="" method="post">    
-                <input type="submit" name="logout" value="Log Out">
-            </form>
+                Server:<input type="text" id='serverTB' name="serverTB" value="127.0.0.1">
+                Username:<input type="text" id='userTB' name="userTB" value="root">
+                Password:<input type="password" id='passTB' name="passTB">
+                <input type="button" value="Log in" name="authenticate" onclick="authenticate()">
 	</div>
 
 	<div id="tablenamesDiv">
-            <?php
-                //The user is authenticated, get dbs that the user can view
-                if((isset($_COOKIE['authenticated']) && !isset($_POST['logout'])) || $auth['error'] == 0) {
-                    if($_COOKIE['authenticated'] == 1) {
-                        $dbs = getDatabases($_COOKIE['server'], $_COOKIE['username'], $_COOKIE['password']);
-                    }
-                }
-                
-                //The user has selected a db and wishes to view the tables
-                if(isset($_POST['dbSelSubmit']) && isset($_COOKIE['server'])) {
-                    $tables = getTables($_COOKIE['server'], $_COOKIE['username'], $_COOKIE['password'], $_POST['dbSel']);
-                }
-            ?>
             Databases: &nbsp;
-            <form action="" method="post">
-                <select name='dbSel'>
-                    <?php
-                        if(isset($dbs['dbs'])) {
-                            $list = $dbs['dbs'];
-                            for($i = 0; $i < sizeof($list); $i++) {
-                                echo "<option value='$list[$i]'>" . $list[$i] . "</option>";
-                            }
-                        }
-                    ?>
-
-                </select>
+            <!-- Add onblur event incase there is only one to choose from, because then onchange cannot fire-->
+            <select id='dbSel' name='dbSel' onchange="getTables()" onblur="getTables()">
+                <option value="">Please Log in</option>
+            </select>
                 <br>
-                <input type='submit' name='dbSelSubmit' value='Change DB'>
-            </form>
-            
             Tables: &nbsp;
-            <form action="" method="post">
-                <select name='tableSel'>
-                    <?php
-                        if(isset($tables['tables'])) {
-                            $list = $tables['tables'];
-                            for($i = 0; $i < sizeof($list); $i++) {
-                                echo "<option value='$list[$i]'>" . $list[$i] . "</option>";
-                            }
-                        }
-                    ?>
-
-                </select>
-                <br>
-                <input type='submit' name='tableSelSubmit' value='Change Table'>
-            </form>
+            <!-- Add onblur event incase there is only one to choose from, because then onchange cannot fire-->
+            <select id='tableSel' name='tableSel' onchange="getSchema()" onblur="getSchema()">
+                <option value="">Select a Database</option>
+            </select>
 	</div>
 	<div id="mainContentDiv">
+            <table id="displayTbl" name='displayTbl'></table>
 	</div>
 	</body>
 </html>
