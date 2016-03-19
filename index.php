@@ -1,5 +1,5 @@
 <!--
-    TODO:   Spice up the CSS - it sucks right nowaday
+    TODO:   Spice up the CSS - it sucks right now
     TODO:   Figure out in schema_success changing null values into either "" or NULL so they show up in the table
     TODO:   Figure out why the last row is there in the getSchema/schema_success function
     TODO:   Add functionality of CUD for Database operations

@@ -1,24 +1,33 @@
 <?php
+/**
+ * Name: DBAPI.php
+ * Author: Jason Duffey
+ *         Ohio Northern University
+ * Date: 3/2016
+ * 
+ * API for accessing an arbitrary database
+ */
 
 //Execute the function specified in the AJAX call by the 'method' data
 echo $_POST['method']();
 
+function sanitize($str, $quotes = ENT_NOQUOTES) {
 //sanitize - sanitizes user input to prevent SQL Injection
 //Parameters - str - the string to be sanitized
 //             quotes - the special flags for the sanitizing function used
-//Return - the sanitized string
-function sanitize($str, $quotes = ENT_NOQUOTES) {
+//Return - the sanitized string    
     $str = htmlspecialchars($str, $quotes);
     return $str;
 }
 
+function authenticateUser() {
 //authenticateUser - authenticates a user on a DB Server, checks to see if they
 //                   have an account on the SQL server
 //                   needs a 'server', 'user', 'pass' to be posted to the page
 //                   these correspond to the server to connect to and the 
-//                   username and password to authenticate
-function authenticateUser() {
-    //Check to see if the proper variables were POSTed
+//                   username and password to authenticate 
+    
+//Check to see if the proper variables were POSTed
     if(isset($_POST['server'])) {
         $server = sanitize($_POST['server']);
     }
@@ -49,12 +58,13 @@ function authenticateUser() {
     return json_encode($result);
 }
 
+function getDatabases() {
 //getDatabases - get the databases the specified user is allowed to view
 //                   needs a 'server', 'user', 'pass' to be posted to the page
 //                   these correspond to the server to connect to and the 
 //                   username and password to authenticate
-function getDatabases() {
-    //Check to see if the proper variables were POSTed
+    
+//Check to see if the proper variables were POSTed
     if(isset($_POST['server'])) {
         $server = sanitize($_POST['server']);
     }
@@ -92,13 +102,13 @@ function getDatabases() {
     return json_encode($result);
 }
 
-
+function getTables() {
 //getTables - get the tables the specified database
 //                   needs a 'server', 'user', 'pass', 'db' to be posted to the page
 //                   these correspond to the server to connect to and the 
 //                   username and password to authenticate as well as the DB to
-//                   get the tables of
-function getTables() {
+//                   get the tables of    
+
     //Check if the proper variables were POSTed
     if(isset($_POST['server'])) {
         $server = sanitize($_POST['server']);
@@ -140,12 +150,13 @@ function getTables() {
     return json_encode($result);
 }
 
+function getSchema() {
 //getSchema - get the schema of the specified table in a DB
 //                   needs a 'server', 'user', 'pass', 'db' , 'table' to be posted to the page
 //                   these correspond to the server to connect to and the 
 //                   username and password to authenticate as well as the DB and
-//                   table to get the schema of
-function getSchema() {
+//                   table to get the schema of    
+    
     //Check to see if the proper variables were POSTed
     if(isset($_POST['server'])) {
         $server = sanitize($_POST['server']);
