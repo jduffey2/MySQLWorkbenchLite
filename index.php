@@ -2,8 +2,10 @@
     TODO:   Spice up the CSS - it sucks right now
     TODO:   Figure out in schema_success changing null values into either "" or NULL so they show up in the table
     TODO:   Figure out why the last row is there in the getSchema/schema_success function
+    TODO:   tableize function breaks if there is no data in it
     TODO:   Add functionality of CUD for Database operations
-    TODO:   Add functionality of CRUD for a table in a DB
+    TODO:   Add functionality of CUD for a table in a DB
+    TODO:   Add functionality to execute arbitrary SQL statements
     TODO:   Add Swag
 -->
 <html>
@@ -37,6 +39,8 @@
 	</div>
 	<div id="mainContentDiv">
             <table id="displayTbl" name='displayTbl'></table>
+            <input type='button' id='getTableData' name='getTableData' value='Get Data' onclick='getTableData()'/>
+            <table id='contentTbl' name='contentTbl'></table>
 	</div>
 	</body>
 </html>

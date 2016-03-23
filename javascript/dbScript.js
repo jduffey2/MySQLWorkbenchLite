@@ -1,5 +1,6 @@
 ////TODO: Figure out in schema_success changing null values into either "" or NULL so they show up in the table
-//TODO Figure out why the last row is there in the getSchema/schema_success function
+//TODO: Figure out why the last row is there in the getSchema/schema_success function
+//TODO: tableize function breaks if the table has no data in it
 /*
  * Name: dbScript.js
  * Author: Jason Duffey
@@ -128,6 +129,32 @@ function schema_success(data) {
     });
 }
 
+function getTableData() {
+//getTableData - Executes an AJAX call to get the SELECT * of a specific table
+//               in a specific DB
+//Parameters - NONE
+//Return - NONE
+    var serverIP = $("#serverTB").val();
+    var username = $("#userTB").val();
+    var password = $("#passTB").val();
+    var db = $("#dbSel").val();
+    var table = $('#tableSel').val();
+    data = {method: 'selectAll', server: serverIP, user: username, pass: password, db: db, table: table};
+
+    AJAXCall(data, tableData_success);
+}
+function tableData_success(data) {
+//tableData_success - gets executed when the getTableData ajax returns successfully
+//                    It creates a table for the user to view the data in the 
+//                    selected table
+//Parameters - data: the data returned from the AJAX call in JSON
+//Return - NONE
+    var value = JSON.parse(data);
+    $("#contentTbl").html("");
+    var table = tableize(value);
+    $("#contentTbl").html(table);
+}
+
 function AJAXCall(data, success_function) {
 //AJAXCall - Executes the actual AJAX call for all of the functions above
 //Parameters: data - the data to pass to the DBAPI as a JS object
@@ -149,4 +176,39 @@ function AJAXCall(data, success_function) {
                 alert("error");
             }
 	});
+}
+
+function tableize(tableData) {
+//tablize - generates the html for a table with the passed in JS Object
+//Parameters - tableData: the data as a JS Object that is to be put into the table
+//NOTE: the Object requires a 'columns' field which is an array with the name of
+//      the columns, as well as fields that are arrays and key are the same name
+//      as the data in the columns array
+//EXAMPLE: tableData = Object {columns: ['Name','ID','Field3'], Name:Array[2], ID:Array[2], Field3:Array[2]}
+//Return: a string that is the HTML for the table
+    
+    //open the table and header row
+    var table = "<table><tr>";
+    
+    //add the header row
+    for(var i = 0; i < tableData.columns.length; i++) {
+        table += "<th>" + tableData.columns[i] + "</th>";
+    }
+    //close the header row
+    table += "</tr>"
+    
+    //iterate through the elements in the remaining columns fields
+    //gets the length of the array titled the same as the first column in condition
+    for(var j = 0; j < tableData[tableData.columns[0]].length; j++) {
+        table += "<tr>";
+        for(var i = 0; i < tableData.columns.length; i++) {
+            table += "<td>" + tableData[tableData.columns[i]][j] + "</td>";
+        }
+        table += "</tr>";
+    }
+    
+    //close the table
+    table += "</table>";
+    
+    return table;
 }

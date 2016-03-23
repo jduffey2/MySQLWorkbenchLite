@@ -204,3 +204,62 @@ function getSchema() {
     
     return json_encode($result);
 }
+
+function selectAll() {
+    //Check to see if the proper variables were POSTed
+    if(isset($_POST['server'])) {
+        $server = sanitize($_POST['server']);
+    }
+    if(isset($_POST['user'])) {
+        $username = sanitize($_POST['user']);
+    }
+    if(isset($_POST['pass'])) {
+        $password = sanitize($_POST['pass']);
+    }
+    if(isset($_POST['db'])) {
+        $database = sanitize($_POST['db']);
+    }
+    if(isset($_POST['table'])) {
+        $table = sanitize($_POST['table']);
+    }
+    
+    //Create a new connection to the server
+    $dbConn = new mysqli($server, $username, $password, $database);
+    if($dbConn->connect_error) {
+            $val = $dbConn->connect_error;
+    }
+    else {
+            $val = 0;
+    }
+    
+    //Execute the query to get the table data
+    $query = "SELECT * FROM " . $table;  
+    $sqlResult = $dbConn->query($query);
+    $dbConn->close();
+    
+    //get the column headers for the table
+    $headers = json_decode(getSchema());
+    
+    //Put the results into an array and return as JSON
+    $result = array();
+    $result['error'] = $val;
+    $i = 0;
+    
+    //put the table headers into the result
+    $result['columns'] = array();
+    foreach ( $headers->field as $field) {
+        array_push($result['columns'],$field);
+    }
+    
+    //loop through each result in the table
+    while($row = $sqlResult->fetch_assoc()) {
+        //loop through each field in each row
+        foreach ( $headers->field as $field) {
+            $result[$field][$i] = $row[$field];
+        }
+        $i++;
+    }
+    
+    return json_encode($result);
+    
+}

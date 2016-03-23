@@ -1,3 +1,4 @@
 nbproject/project.xml
 nbproject/private/private.xml
 *.properties
+/matt/dbClass-master/nbproject/private/
