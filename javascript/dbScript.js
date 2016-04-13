@@ -10,6 +10,7 @@
  * Uses DBAPI to access arbitrary databases, used in this context to create
  * a 'MySQL Workbench Lite' type of implementation
  */
+var CurtableData = {};
 
 function authenticate() {
 //authenticate - Executes an AJAX call to authenticate a user on the server
@@ -111,6 +112,8 @@ function getSchema() {
     data = {method: 'getSchema', server: serverIP, user: username, pass: password, db: db, table: table};
 
     AJAXCall(data, schema_success);
+    
+    getTableData();
 }
 function schema_success(data) {
 //schema_success - The function that gets executed when the getSchema ajax
@@ -127,6 +130,14 @@ function schema_success(data) {
         table.append("<tr><td>" + value['field'][index] + "</td><td>" + value['type'][index] + "</td><td>" + value['null'][index] + "</td><td>");
         table.append(value['key'][index] + "</td><td>" + value['default'][index] + "</td><td>" + value['extra'][index] + "</td></tr>");
     });
+    
+    //clear out any current table data
+    $("#contentTbl").html("");
+    
+    CurtableData['primary'] = value['primary'];
+    CurtableData['keyColumn'] = value['keyColumn'];
+    CurtableData['referencedTable'] = value['referencedtable'];
+    CurtableData['referencedColumn'] = value['referencedColumn'];
 }
 
 function getTableData() {
@@ -153,6 +164,9 @@ function tableData_success(data) {
     $("#contentTbl").html("");
     var table = tableize(value);
     $("#contentTbl").html(table);
+    $("#controlDiv").html('<input type="button" id="insertBtn" value="Insert Row" onclick="insertRow()" />');
+    
+    CurtableData['table'] = $('#tableSel').val();
 }
 
 function AJAXCall(data, success_function) {
@@ -189,26 +203,106 @@ function tableize(tableData) {
     
     //open the table and header row
     var table = "<table><tr>";
+    var columns = [];
     
     //add the header row
     for(var i = 0; i < tableData.columns.length; i++) {
         table += "<th>" + tableData.columns[i] + "</th>";
+        columns.push(tableData.columns[i]);
     }
+    table += "<th>Delete</th>";
+    CurtableData['columns'] = columns;
     //close the header row
     table += "</tr>"
     
     //iterate through the elements in the remaining columns fields
     //gets the length of the array titled the same as the first column in condition
-    for(var j = 0; j < tableData[tableData.columns[0]].length; j++) {
-        table += "<tr>";
-        for(var i = 0; i < tableData.columns.length; i++) {
-            table += "<td>" + tableData[tableData.columns[i]][j] + "</td>";
+    if(typeof(tableData[tableData.columns[0]]) !== 'undefined') {
+        for(var j = 0; j < tableData[tableData.columns[0]].length; j++) {
+            table += "<tr>";
+            for(var i = 0; i < tableData.columns.length; i++) {
+                table += "<td>" + tableData[tableData.columns[i]][j] + "</td>";
+            }
+            table += "<td><input type='button' value='Delete' onclick='delete()' /></td>";
+            table += "</tr>";
         }
-        table += "</tr>";
     }
+    
+    table += "<tr>";
+    for(var i = 0; i < tableData.columns.length; i++) {
+        if($.inArray(tableData.columns[i], CurtableData['keyColumn']) == -1) {
+            table += "<td><input type='textbox' id='" + tableData.columns[i] + "' /></td>";
+        }
+        else {
+            table += "<td><select id='" + tableData.columns[i] + "'></select></td>";
+            getSelData(tableData.columns[i]);
+        }
+    }
+    table += "<td></td>";
+    
     
     //close the table
     table += "</table>";
     
     return table;
+}
+
+function insertRow() {
+    var serverIP = $("#serverTB").val();
+    var username = $("#userTB").val();
+    var password = $("#passTB").val();
+    var db = $("#dbSel").val();
+    
+    var rowData = {};
+    
+    for(var i = 0; i < CurtableData['columns'].length; i++) {
+        var selector = "#" + CurtableData['columns'][i];
+        rowData[CurtableData['columns'][i]] = $(selector).val();
+    }
+    
+    data = {method:"insert", server:serverIP, user:username, pass:password, db:db, tableData:CurtableData, data: rowData};
+    
+    AJAXCall(data, insert_success);
+}
+function insert_success(data) {
+    getTableData();
+}
+
+function getSelData(column) {
+    var serverIP = $("#serverTB").val();
+    var username = $("#userTB").val();
+    var password = $("#passTB").val();
+    var db = $("#dbSel").val();
+    var select = {};
+    
+    var index = $.inArray(column, CurtableData['keyColumn']);
+    select['table'] = CurtableData['referencedTable'][index];
+    select['where'] = 1;
+    select['columns'] = [];
+    select['columns'].push(CurtableData['referencedColumn'][index]);
+    data = {method: 'selectRows', server: serverIP, user: username, pass: password, db: db, selectData:select};
+    
+    $.ajax({
+            url: 'DBAPI.php',
+            data: data,
+            type: 'post',
+            datatype: 'json',
+            success: function(return_value) {
+                   var value = JSON.parse(return_value);
+                   var selElement = "#" + column;
+                   var ElemSel = $(selElement); //get the DOM select element for the table names
+                   ElemSel.empty();
+                   if(value['error'] === 0) {
+                       $.each(value[CurtableData['referencedColumn'][index]], function(ind, value) {
+                           ElemSel.append($("<option>", {
+                               value: value,
+                               text: value
+                           }));
+                       });
+                   }    
+            },
+            error: function(xhr, message) {
+                alert("error");
+            }
+    });
 }

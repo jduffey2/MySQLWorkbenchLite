@@ -39,8 +39,9 @@
 	</div>
 	<div id="mainContentDiv">
             <table id="displayTbl" name='displayTbl'></table>
-            <input type='button' id='getTableData' name='getTableData' value='Get Data' onclick='getTableData()'/>
+            <!--<input type='button' id='getTableData' name='getTableData' value='Get Data' onclick='getTableData()'/>-->
             <table id='contentTbl' name='contentTbl'></table>
+            <div id="controlDiv"></div>
 	</div>
 	</body>
 </html>
