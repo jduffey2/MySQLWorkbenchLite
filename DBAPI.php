@@ -29,19 +29,8 @@ function authenticateUser() {
 //                   these correspond to the server to connect to and the 
 //                   username and password to authenticate 
     
-//Check to see if the proper variables were POSTed
-    if(isset($_POST['server'])) {
-        $server = sanitize($_POST['server']);
-    }
-    if(isset($_POST['user'])) {
-        $username = sanitize($_POST['user']);
-    }
-    if(isset($_POST['pass'])) {
-        $password = sanitize($_POST['pass']);
-    }
-    
     //Create a new connection to the server
-    $dbConn = new mysqli($server, $username, $password);
+    $dbConn = connectUser();
     
     //Check for errors, if 0 then successfully connected
     if($dbConn->connect_error) {
@@ -67,18 +56,9 @@ function getDatabases() {
 //                   username and password to authenticate
     
 //Check to see if the proper variables were POSTed
-    if(isset($_POST['server'])) {
-        $server = sanitize($_POST['server']);
-    }
-    if(isset($_POST['user'])) {
-        $username = sanitize($_POST['user']);
-    }
-    if(isset($_POST['pass'])) {
-        $password = sanitize($_POST['pass']);
-    }
     
     //create a new connection to the server
-    $dbConn = new mysqli($server, $username, $password);
+    $dbConn = connectUser();
     if($dbConn->connect_error) {
             $val = $dbConn->connect_error;
     }
@@ -110,23 +90,9 @@ function getTables() {
 //                   these correspond to the server to connect to and the 
 //                   username and password to authenticate as well as the DB to
 //                   get the tables of    
-
-    //Check if the proper variables were POSTed
-    if(isset($_POST['server'])) {
-        $server = sanitize($_POST['server']);
-    }
-    if(isset($_POST['user'])) {
-        $username = sanitize($_POST['user']);
-    }
-    if(isset($_POST['pass'])) {
-        $password = sanitize($_POST['pass']);
-    }
-    if(isset($_POST['db'])) {
-        $database = sanitize($_POST['db']);
-    }
     
     //Create a new connection to the server
-    $dbConn = new mysqli($server, $username, $password);
+    $dbConn = connectDB();
     if($dbConn->connect_error) {
             $val = $dbConn->connect_error;
     }
@@ -135,7 +101,7 @@ function getTables() {
     }
 
     //Execute the query to get the tables
-    $query = "SHOW TABLES IN " . $database;      
+    $query = "SHOW TABLES IN " . $_POST['db'];      
     $sqlResult = $dbConn->query($query);
     $dbConn->close();
 
@@ -160,24 +126,12 @@ function getSchema() {
 //                   table to get the schema of    
     
     //Check to see if the proper variables were POSTed
-    if(isset($_POST['server'])) {
-        $server = sanitize($_POST['server']);
-    }
-    if(isset($_POST['user'])) {
-        $username = sanitize($_POST['user']);
-    }
-    if(isset($_POST['pass'])) {
-        $password = sanitize($_POST['pass']);
-    }
-    if(isset($_POST['db'])) {
-        $database = sanitize($_POST['db']);
-    }
     if(isset($_POST['table'])) {
         $table = sanitize($_POST['table']);
     }
     
     //Create a new connection to the server
-    $dbConn = new mysqli($server, $username, $password, $database);
+    $dbConn = connectDB();
     if($dbConn->connect_error) {
             $val = $dbConn->connect_error;
     }
@@ -194,7 +148,7 @@ function getSchema() {
     $indexResult = $dbConn->query($sql);
     
     //Get the foreign keys for the table
-    $foreignSQL = "SELECT column_name, referenced_table_name, referenced_column_name FROM information_schema.KEY_COLUMN_USAGE WHERE CONSTRAINT_SCHEMA = '" . $database . "' and REFERENCED_TABLE_SCHEMA IS NOT NULL and table_name = '" . $table . "'";
+    $foreignSQL = "SELECT column_name, referenced_table_name, referenced_column_name FROM information_schema.KEY_COLUMN_USAGE WHERE CONSTRAINT_SCHEMA = '" . $_POST['db'] . "' and REFERENCED_TABLE_SCHEMA IS NOT NULL and table_name = '" . $table . "'";
     $foreignResult = $dbConn->query($foreignSQL);
     $dbConn->close();
     
@@ -232,25 +186,20 @@ function getSchema() {
 }
 
 function selectAll() {
+    //selectAll - executes a select * statement on a table
+    //                   needs a 'server', 'user', 'pass', 'db' , 'table' to be posted to the page
+    //                   these correspond to the server to connect to and the 
+    //                   username and password to authenticate as well as the DB and
+    //                   table to get the schema of    
+    
+    
     //Check to see if the proper variables were POSTed
-    if(isset($_POST['server'])) {
-        $server = sanitize($_POST['server']);
-    }
-    if(isset($_POST['user'])) {
-        $username = sanitize($_POST['user']);
-    }
-    if(isset($_POST['pass'])) {
-        $password = sanitize($_POST['pass']);
-    }
-    if(isset($_POST['db'])) {
-        $database = sanitize($_POST['db']);
-    }
     if(isset($_POST['table'])) {
         $table = sanitize($_POST['table']);
     }
     
     //Create a new connection to the server
-    $dbConn = new mysqli($server, $username, $password, $database);
+    $dbConn = connectDB();
     if($dbConn->connect_error) {
             $val = $dbConn->connect_error;
     }
@@ -290,14 +239,8 @@ function selectAll() {
     
 }
 
-function connect() {
-    $dbConn = new mysqli(getServer(), getUsername(), getPassword());
-    
-    return $dbConn;
-}
-
-function selectRows() {
-    //Check to see if the proper variables were POSTed
+function connectDB() {
+        //Check to see if the proper variables were POSTed
     if(isset($_POST['server'])) {
         $server = sanitize($_POST['server']);
     }
@@ -310,6 +253,38 @@ function selectRows() {
     if(isset($_POST['db'])) {
         $database = sanitize($_POST['db']);
     }
+    $dbConn = new mysqli($server, $username, $password, $database);
+    
+    return $dbConn;
+}
+
+function connectUser() {
+            //Check to see if the proper variables were POSTed
+    if(isset($_POST['server'])) {
+        $server = sanitize($_POST['server']);
+    }
+    if(isset($_POST['user'])) {
+        $username = sanitize($_POST['user']);
+    }
+    if(isset($_POST['pass'])) {
+        $password = sanitize($_POST['pass']);
+    }
+
+    $dbConn = new mysqli($server, $username, $password);
+    
+    return $dbConn;
+}
+
+function selectRows() {
+    //selectRows - exectutes a conditional select statement on specified columns
+    //              requires 'server', 'user', 'pass', 'db', and 'selectData' 
+    //              variables to be POSTed
+    //              'selectData' is required to have three variables in it -
+    //                      'table', 'columns', and 'where'
+    //                      columns should be an array of the columns to select
+    //                      where should be the SQL where clause conditional you
+    //                      want to filter on
+    //Check to see if the proper variables were POSTed
     if(isset($_POST['selectData'])) {
        $table = $_POST['selectData']['table'];
        $columns = $_POST['selectData']['columns'];
@@ -317,7 +292,7 @@ function selectRows() {
     };
     
     //Create a new connection to the server
-    $dbConn = new mysqli($server, $username, $password, $database);
+    $dbConn = connectDB();
     if($dbConn->connect_error) {
             $val = $dbConn->connect_error;
     }
@@ -325,9 +300,10 @@ function selectRows() {
             $val = 0;
     }
     
+    //build the select statement
     $query = "SELECT ";
-    $queryCol = implode(", ", $columns);
-    $query .= $queryCol . " FROM " . $table . " WHERE " . $where . ";";
+    $queryCol = implode(", ", $columns); //concat all the columns togeter
+    $query .= $queryCol . " FROM " . $table . " WHERE " . $where . ";";  //throw on the where clause
     
     $queryResult = $dbConn->query($query);
     $dbConn->close();
@@ -352,26 +328,23 @@ function selectRows() {
 }
 
 function insert() {
+    //insert - exectutes an insert statement on specified columns
+    //              requires 'server', 'user', 'pass', 'db', 'data' and 'tableData' 
+    //              variables to be posted
+    //              'table' is required to have three variables in it -
+    //                      'table', and 'columns''
+    //                      columns should be an array of the columns to select
+    //              'data' should be an array of the data to insert in the order
+    //                      of the columns array
+ 
     //Check to see if the proper variables were POSTed
-    if(isset($_POST['server'])) {
-        $server = sanitize($_POST['server']);
-    }
-    if(isset($_POST['user'])) {
-        $username = sanitize($_POST['user']);
-    }
-    if(isset($_POST['pass'])) {
-        $password = sanitize($_POST['pass']);
-    }
-    if(isset($_POST['db'])) {
-        $database = sanitize($_POST['db']);
-    }
     if(isset($_POST['tableData'])) {
        $table = $_POST['tableData']['table'];
        $columns = $_POST['tableData']['columns'];
     }
     
     //Create a new connection to the server
-    $dbConn = new mysqli($server, $username, $password, $database);
+    $dbConn = connectDB();
     if($dbConn->connect_error) {
             $val = $dbConn->connect_error;
     }
@@ -379,11 +352,11 @@ function insert() {
             $val = 0;
     }
     
-    
+    //build the insert statment
     $query = "INSERT INTO " . $table . " (";
-    $queryCol = implode(", ",$columns);
+    $queryCol = implode(", ",$columns); //concat all the columns together
     $query .= $queryCol . ") VALUES ('";
-    $queryData = implode("', '", $_POST['data']);
+    $queryData = implode("', '", $_POST['data']); //concat the data together
     $query .= $queryData . "');";
     
     $sqlResult = $dbConn->query($query);
@@ -396,12 +369,3 @@ function insert() {
     $result['SQL'] = $query;
     return json_encode($result);
 }
-
-//SELECT * FROM `KEY_COLUMN_USAGE` WHERE CONSTRAINT_SCHEMA = 'nascardb' and REFERENCED_TABLE_SCHEMA IS NOT NULL;
-//        table_name
-//        column_name
-//        referenced_table_name
-//        referenced_column_name
-//
-//SHOW INDEX FROM `table`
-//       key_name = 'PRIMARY'

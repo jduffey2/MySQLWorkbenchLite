@@ -228,6 +228,8 @@ function tableize(tableData) {
         }
     }
     
+    //iterate through adding an edit box to insert a new row, either a textbox
+    //or a select box if there is a foreign key
     table += "<tr>";
     for(var i = 0; i < tableData.columns.length; i++) {
         if($.inArray(tableData.columns[i], CurtableData['keyColumn']) == -1) {
@@ -248,6 +250,10 @@ function tableize(tableData) {
 }
 
 function insertRow() {
+//insertRow - Executes an AJAX call to insert a row into a specific table in a
+//            specific DB
+//Parameters - NONE
+//Return - NONE
     var serverIP = $("#serverTB").val();
     var username = $("#userTB").val();
     var password = $("#passTB").val();
@@ -255,26 +261,36 @@ function insertRow() {
     
     var rowData = {};
     
+    //get all of the inputed data
     for(var i = 0; i < CurtableData['columns'].length; i++) {
         var selector = "#" + CurtableData['columns'][i];
         rowData[CurtableData['columns'][i]] = $(selector).val();
     }
     
     data = {method:"insert", server:serverIP, user:username, pass:password, db:db, tableData:CurtableData, data: rowData};
-    
     AJAXCall(data, insert_success);
 }
 function insert_success(data) {
+//schema_success - The function that gets executed when the insertRow ajax
+//                 returns successfully It updates the table of values for the table
+//Parameters - data: the data returned from the AJAX call in JSON
+//Return - NONE
     getTableData();
 }
 
 function getSelData(column) {
+//getSelData - cross references the referenced table and columns and 
+//             executes an ajax call to grab the appropriate values from the DB
+//Parameters - column - the column name to find the referenced column to get the 
+//             data from
+//Return - NONE
     var serverIP = $("#serverTB").val();
     var username = $("#userTB").val();
     var password = $("#passTB").val();
     var db = $("#dbSel").val();
     var select = {};
     
+    //gets the referenced table and column
     var index = $.inArray(column, CurtableData['keyColumn']);
     select['table'] = CurtableData['referencedTable'][index];
     select['where'] = 1;
@@ -282,6 +298,7 @@ function getSelData(column) {
     select['columns'].push(CurtableData['referencedColumn'][index]);
     data = {method: 'selectRows', server: serverIP, user: username, pass: password, db: db, selectData:select};
     
+    //executes the AJAX call and builds the <option> elements upon success
     $.ajax({
             url: 'DBAPI.php',
             data: data,
