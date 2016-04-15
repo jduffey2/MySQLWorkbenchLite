@@ -4,7 +4,7 @@
     TODO:   Figure out why the last row is there in the getSchema/schema_success function
     TODO:   tableize function breaks if there is no data in it
     TODO:   Add functionality of CUD for Database operations
-    TODO:   Add functionality of CUD for a table in a DB
+    TODO:   Add functionality of UD for a table in a DB
     TODO:   Add functionality to execute arbitrary SQL statements
     TODO:   Add Swag
 -->

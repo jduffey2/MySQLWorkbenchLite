@@ -1,5 +1,4 @@
 ////TODO: Figure out in schema_success changing null values into either "" or NULL so they show up in the table
-//TODO: Figure out why the last row is there in the getSchema/schema_success function
 //TODO: tableize function breaks if the table has no data in it
 /*
  * Name: dbScript.js
@@ -260,14 +259,22 @@ function insertRow() {
     var db = $("#dbSel").val();
     
     var rowData = {};
+    var tableData = {};
+    tableData['table'] = CurtableData['table'];
+    tableData['columns'] = [];
     
     //get all of the inputed data
     for(var i = 0; i < CurtableData['columns'].length; i++) {
         var selector = "#" + CurtableData['columns'][i];
-        rowData[CurtableData['columns'][i]] = $(selector).val();
+        if($(selector).val() != "") {
+            //add the data to the rowData if the user has entered something
+            rowData[CurtableData['columns'][i]] = $(selector).val();
+            //only adding the column if the user has entered something
+            tableData['columns'].push(CurtableData['columns'][i]);
+        }
     }
     
-    data = {method:"insert", server:serverIP, user:username, pass:password, db:db, tableData:CurtableData, data: rowData};
+    data = {method:"insert", server:serverIP, user:username, pass:password, db:db, tableData:tableData, data: rowData};
     AJAXCall(data, insert_success);
 }
 function insert_success(data) {
