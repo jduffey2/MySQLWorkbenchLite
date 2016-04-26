@@ -38,3 +38,7 @@ th {
 table {
     margin: 20px;
 }
+
+#arbitraryDiv {
+    display: none;
+}

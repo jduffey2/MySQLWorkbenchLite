@@ -12,8 +12,9 @@
 	<head>
 		<title>DB Table Creation</title>
 		<link rel="stylesheet" type="text/css" href="css/dbStyle.css">
+                <script type="text/javascript" src="javascript/jquery-2.2.1.min.js"></script>
 		<script type="text/javascript" src="javascript/dbScript.js"></script>
-		<script type="text/javascript" src="javascript/jquery-2.2.1.min.js"></script>
+		
 	</head>
 	<body>
 	<div id="authenticateDiv">
@@ -43,5 +44,9 @@
             <table id='contentTbl' name='contentTbl'></table>
             <div id="controlDiv"></div>
 	</div>
+            <div id='arbitraryDiv'>
+                <textarea id="arbitraryTA">SELECT t.Name AS trackName, t.City, s.Name  FROM tracks AS t, states AS s WHERE t.state = s.Abbreviation;</textarea>
+                <input type="button" value='Submit' onclick='execArb()'
+            </div>
 	</body>
 </html>

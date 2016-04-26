@@ -10,6 +10,7 @@
  * a 'MySQL Workbench Lite' type of implementation
  */
 var CurtableData = {};
+$("#arbitraryDiv").hide();
 
 function authenticate() {
 //authenticate - Executes an AJAX call to authenticate a user on the server
@@ -71,6 +72,7 @@ function getTables() {
 //getTables - Executes an AJAX call to get the names of the tables in a specific DB
 //Parameters - NONE
 //Return - NONE
+    $("#arbitraryDiv").show();
     var serverIP = $("#serverTB").val();
     var username = $("#userTB").val();
     var password = $("#passTB").val();
@@ -149,7 +151,7 @@ function getTableData() {
     var password = $("#passTB").val();
     var db = $("#dbSel").val();
     var table = $('#tableSel').val();
-    data = {method: 'selectAll', server: serverIP, user: username, pass: password, db: db, table: table};
+    var data = {method: 'selectAll', server: serverIP, user: username, pass: password, db: db, table: table};
 
     AJAXCall(data, tableData_success);
 }
@@ -329,4 +331,49 @@ function getSelData(column) {
                 alert("error");
             }
     });
+}
+
+function execArb() {
+//execArb - Executes an AJAX call to execute an arbitrary SQL statement
+//Parameters - NONE
+//Return - NONE
+    var serverIP = $("#serverTB").val();
+    var username = $("#userTB").val();
+    var password = $("#passTB").val();
+    var db = $("#dbSel").val();
+    var statement = $("#arbitraryTA").val();
+    data = {method:'execArb', server: serverIP, user: username, pass:password, db:db, sql:statement};
+    
+    AJAXCall(data, arbitrary_success);
+}
+function arbitrary_success(return_value) {
+//arbitrary_success - The function that gets executed when the execArb ajax
+//                 returns successfully Processes the information returned from
+//                 the call
+//Parameters - data: the data returned from the AJAX call in JSON
+//Return - NONE
+    var value = JSON.parse(return_value);
+    
+    //Checks if result is an attribute in the return data
+    //if so it means it was some writing statement that has no other return value
+    if('result' in value) {
+        //if it is true the statement executed successfully
+        if(value['result']) {
+           $("#contentTbl").html("");
+            $("#contentTbl").html("Success!"); 
+        }
+        else {
+            $("#contentTbl").html("");
+            $("#contentTbl").html("Error!");
+        }
+        
+    }
+    //if there is no such attribute it means some data was returned
+    //SELECT, SHOW, DESCRIBE, EXPLAIN are the only statements that return data
+    else {
+        $("#contentTbl").html("");
+        var table = tableize(value);
+        $("#contentTbl").html(table);
+        $("#controlDiv").html('<input type="button" id="insertBtn" value="Insert Row" onclick="insertRow()" />');
+    }
 }

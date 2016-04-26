@@ -369,3 +369,57 @@ function insert() {
     $result['SQL'] = $query;
     return json_encode($result);
 }
+
+function execArb() {
+//execArb - exectutes an arbitrary SQL statement
+    //              requires 'server', 'user', 'pass', and 'db' 
+    //              variables to be posted
+    //              It will run the query and if a data table is returned
+    //              it will properly parse the data similar to the select function
+    //              above. SELECT, SHOW, DESCRIBE, EXPLAIN are only functions that
+    //              do. All other queries return true or false and are in the 
+    //              result property of the result
+    
+    //Check if correct variables were POST'ed
+    if(isset($_POST['sql'])) {
+        $sql = $_POST['sql'];
+    }
+    
+    //Create a new connection to the server
+    $dbConn = connectDB();
+    if($dbConn->connect_error) {
+            $val = $dbConn->connect_error;
+    }
+    else {
+            $val = 0;
+    }
+    
+    $sqlresult = $dbConn->query($sql);
+    
+    //Check if result has a field_count attribute and therefore is a mysqli_result
+    //object
+    if(isset($sqlresult->field_count)) {
+        $result['columns'] = array();
+
+        //get the names of the columns of the returned table
+        $tableColumns = $sqlresult->fetch_fields();
+        foreach($tableColumns as $col) {
+            array_push($result['columns'],$col->name);
+        }
+        $i = 0;
+        //loop through each result in the table
+        while($row = $sqlresult->fetch_assoc()) {
+            //loop through each field in each row
+            foreach ( $result['columns'] as $field) {
+                $result[$field][$i] = $row[$field];
+            }
+            $i++;
+        }
+    }
+    else {
+        //no data returned only true or false
+        $result['result'] = $sqlresult;
+    }
+       $result['error'] = $val;
+    return json_encode($result);
+}
